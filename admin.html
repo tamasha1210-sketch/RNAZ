@@ -141,7 +141,7 @@ audio{width:100%;margin-top:8px;border-radius:8px}
   <header>
     <div class="h-title">⚙️ پنل مدیریت</div>
     <div style="display:flex;gap:8px">
-      <a href="home.html" class="h-back">🏠 اپ</a>
+      <a href="home.html" class="h-back" target="_blank">🏠 اپ</a>
       <button class="logout-btn" onclick="doLogout()">خروج</button>
     </div>
   </header>
@@ -362,6 +362,18 @@ audio{width:100%;margin-top:8px;border-radius:8px}
       </div>
 
       <div class="card">
+        <div class="card-title">🎬 آپلود کلیپ ویدیو</div>
+        <div id="videoList" class="prod-list"></div>
+        <div class="field" style="margin-top:10px">
+          <label>افزودن کلیپ (mp4، حداکثر ۵۰ مگابایت)</label>
+          <div class="audio-upload">
+            <input type="file" id="newVideo" accept="video/*" onchange="addVideo()">
+            <span>🎬</span><span class="audio-name" id="videoName">برای آپلود کلیک کنید</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
         <div class="card-title">🎮 بازی</div>
         <div class="field"><label>نوع بازی</label>
           <select id="gameType">
@@ -413,13 +425,18 @@ audio{width:100%;margin-top:8px;border-radius:8px}
         <div class="field"><label>روبیکا</label><input type="text" id="rubika" placeholder="آیدی روبیکا"></div>
       </div>
       <div class="card">
-        <div class="card-title">📨 تنظیمات ایتا (اعلان خودکار)</div>
-        <div class="field"><label>توکن ربات ایتا</label><input type="text" id="eitaaToken" placeholder="توکن از @همیار_ربات"></div>
-        <div class="field"><label>آیدی کانال</label><input type="text" id="eitaaChatId" value="@Reihanenooralzahra" placeholder="@username"></div>
+        <div class="card-title">📨 تنظیمات ایتا</div>
+        <div style="font-size:12px;color:var(--text2);line-height:2;margin-bottom:12px;background:rgba(212,175,55,.05);border-radius:8px;padding:10px;border:1px solid rgba(212,175,55,.15)">
+          💡 برای ارسال خودکار به ایتا، ربات رایگان بسازید:<br>
+          ۱. در ایتا به <b style="color:var(--g)">@eitaa_kbot</b> پیام بدید<br>
+          ۲. دستور /newbot رو بزنید<br>
+          ۳. توکن رو اینجا وارد کنید
+        </div>
+        <div class="field"><label>توکن ربات ایتا (رایگان)</label><input type="text" id="eitaaToken" placeholder="توکن ربات ایتا"></div>
+        <div class="field"><label>آیدی کانال یا چت</label><input type="text" id="eitaaChatId" value="@Reihanenooralzahra" placeholder="@username"></div>
         <div style="font-size:11px;color:var(--text2);line-height:1.9;margin-top:4px">
-          ⚠️ ربات باید ادمین کانال باشد<br>
-          📨 ثبت‌نام باشگاه → ارسال خودکار به کانال<br>
-          🔒 لینک کانال در اپ مشتری نمایش داده نمی‌شود
+          📨 ثبت‌نام باشگاه → اعلان به ایتا<br>
+          🔒 لینک کانال در اپ مشتری نمایش نمی‌شود
         </div>
       </div>
       <button class="btn-save" onclick="saveSection('contact')">💾 ذخیره اطلاعات تماس</button>
@@ -480,33 +497,61 @@ audio{width:100%;margin-top:8px;border-radius:8px}
     <div class="section" id="sec-ai">
 
       <div class="card">
-        <div class="card-title">🖼️ تولید عکس محصول</div>
+        <div class="card-title">✨ ویرایش عکس با هوش مصنوعی</div>
+        <div class="field">
+          <label>۱. عکس محصول خود را آپلود کنید</label>
+          <div class="img-upload">
+            <input type="file" id="aiUploadFile" accept="image/*" onchange="loadAIUpload()">
+            <div class="up-icon">📷</div>
+            <div class="up-text">عکس محصول را انتخاب کنید</div>
+            <img class="img-preview" id="aiUploadPreview">
+          </div>
+        </div>
+        <div class="field">
+          <label>۲. نوع پس‌زمینه دلخواه</label>
+          <select id="aiBgStyle">
+            <option value="gold">✨ طلایی اسلامی</option>
+            <option value="dark">🌙 تیره لاکچری</option>
+            <option value="white">⬜ سفید حرفه‌ای</option>
+            <option value="nature">🌿 طبیعت سبز</option>
+            <option value="gradient">🌈 گرادیان رنگی</option>
+            <option value="marble">🪨 مرمر سفید</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>۳. متن روی عکس (اختیاری)</label>
+          <input type="text" id="aiTextOverlay" placeholder="مثلاً: تخفیف ویژه | ریحانة نورالزهرا">
+        </div>
+        <button class="btn-save" onclick="editWithAI()">✨ ویرایش و زیباسازی</button>
+      </div>
+
+      <div class="card" id="aiResultCard" style="display:none">
+        <div class="card-title">🖼️ نتیجه ویرایش</div>
+        <canvas id="aiCanvas" style="width:100%;border-radius:10px;display:block"></canvas>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">
+          <button class="btn-edit" onclick="useAIAsLogo()" style="padding:10px;font-size:12px">🖼️ لوگو</button>
+          <button class="btn-edit" onclick="useAIAsBanner()" style="padding:10px;font-size:12px">📢 بنر</button>
+          <button class="btn-edit" onclick="downloadAIImg()" style="padding:10px;font-size:12px">⬇️ دانلود</button>
+        </div>
+        <button class="btn-add" onclick="editWithAI()" style="margin-top:8px">🔄 دوباره ویرایش</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🤖 تولید عکس با متن</div>
         <div class="field">
           <label>توضیح محصول (فارسی)</label>
           <input type="text" id="aiPromptFa" placeholder="مثلاً: تسبیح کریستال طلایی زیبا">
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-          <div class="field">
-            <label>اندازه</label>
-            <select id="aiSize">
-              <option value="512x512">مربع ۵۱۲</option>
-              <option value="768x512">افقی</option>
-              <option value="512x768">عمودی</option>
-              <option value="1024x1024">بزرگ ۱۰۲۴</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>سبک تصویر</label>
-            <select id="aiStyle">
-              <option value="product photo, white background, professional, high quality">عکس محصول</option>
-              <option value="islamic art, golden decorative, elegant, luxury">اسلامی طلایی</option>
-              <option value="store banner, promotional, colorful, persian style">بنر تبلیغاتی</option>
-              <option value="minimalist, clean, modern photography">مینیمال</option>
-              <option value="religious, spiritual, warm lighting, beautiful">مذهبی معنوی</option>
-            </select>
-          </div>
+        <div class="field">
+          <label>سبک تصویر</label>
+          <select id="aiStyle">
+            <option value="product photo, white background, professional, high quality">عکس محصول</option>
+            <option value="islamic art, golden decorative, elegant, luxury">اسلامی طلایی</option>
+            <option value="store banner, promotional, colorful, persian style">بنر تبلیغاتی</option>
+            <option value="religious, spiritual, warm lighting, beautiful">مذهبی معنوی</option>
+          </select>
         </div>
-        <button class="btn-save" onclick="generateAI()" id="aiBtnGen">🤖 تولید تصویر</button>
+        <button class="btn-save" onclick="generateAI()">🤖 تولید تصویر</button>
       </div>
 
       <div class="card" id="aiResultCard" style="display:none">
@@ -658,9 +703,23 @@ audio{width:100%;margin-top:8px;border-radius:8px}
       <span class="toggle-label">پرفروش</span>
       <label class="toggle"><input type="checkbox" id="pTopSell"><span class="toggle-slider"></span></label>
     </div>
+    <div class="toggle-row">
+      <span class="toggle-label">پرفروش</span>
+      <label class="toggle"><input type="checkbox" id="pTopSell"><span class="toggle-slider"></span></label>
+    </div>
     <div class="toggle-row" style="margin-bottom:14px">
       <span class="toggle-label">موجود</span>
       <label class="toggle"><input type="checkbox" id="pAvailable" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="card" style="margin-top:10px;border:1px solid rgba(212,175,55,.2)">
+      <div class="card-title" style="margin-bottom:10px">💰 قیمت همکاری (بازه‌ای)</div>
+      <div id="tierList"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
+        <input type="number" id="tierFrom" placeholder="از" style="background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px;color:var(--text);font-size:12px;outline:none">
+        <input type="number" id="tierTo" placeholder="تا" style="background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px;color:var(--text);font-size:12px;outline:none">
+        <input type="text" id="tierPrice" placeholder="قیمت" style="background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px;color:var(--text);font-size:12px;outline:none">
+      </div>
+      <button class="btn-add" onclick="addTier()" style="margin-top:6px">➕ افزودن بازه</button>
     </div>
     <button class="btn-save" onclick="saveProd()">💾 ذخیره محصول</button>
   </div>
@@ -901,6 +960,9 @@ function openProdModal(idx){
     document.getElementById('pAvailable').checked  = p.available!==false;
     if(p.img){ document.getElementById('pImgPreview').src=p.img; document.getElementById('pImgPreview').style.display='block'; }
   }
+  // لود بازه‌های قیمتی
+  currentTiers = (idx>=0 && prods[idx] && prods[idx].partnerTiers) ? prods[idx].partnerTiers.slice() : [];
+  renderTiers();
   document.getElementById('prodModal').classList.add('open');
 }
 
@@ -914,7 +976,8 @@ function saveProd(){
     desc:      document.getElementById('pDesc').value,
     topSell:   document.getElementById('pTopSell').checked,
     available: document.getElementById('pAvailable').checked,
-    img:       tempImgs.pImgData || (editingProd>=0 ? prods[editingProd].img : null)
+    img:       tempImgs.pImgData || (editingProd>=0 ? prods[editingProd].img : null),
+    partnerTiers: currentTiers.slice()
   };
   if(!obj.name){ toast('نام محصول را وارد کنید','error'); return; }
   if(editingProd===-1) prods.push(obj);
@@ -1039,43 +1102,38 @@ function setCats(c){}
 // ===== مداحی =====
 function getAudios(){ return JSON.parse(localStorage.getItem('audios')||'[]'); }
 function setAudios(a){ localStorage.setItem('audios', JSON.stringify(a)); }
-// ===== IndexedDB برای فایل‌های صوتی =====
-var audioDB = null;
-
+// ===== IndexedDB صوتی =====
 function openAudioDB(cb){
-  if(audioDB){ cb(audioDB); return; }
-  var req = indexedDB.open('AudioDB', 1);
+  var req = indexedDB.open('AudioTestDB', 1);
   req.onupgradeneeded = function(e){
-    e.target.result.createObjectStore('audios', {keyPath:'id', autoIncrement:true});
+    var db = e.target.result;
+    if(!db.objectStoreNames.contains('audios'))
+      db.createObjectStore('audios', {keyPath:'id', autoIncrement:true});
+    if(!db.objectStoreNames.contains('videos'))
+      db.createObjectStore('videos', {keyPath:'id', autoIncrement:true});
   };
-  req.onsuccess = function(e){ audioDB = e.target.result; cb(audioDB); };
-  req.onerror   = function(){ toast('خطا در باز کردن پایگاه داده','error'); };
+  req.onsuccess = function(e){ cb(e.target.result); };
+  req.onerror   = function(){ toast('❌ خطا در پایگاه داده','error'); };
 }
 
 function addAudio(){
   var file = document.getElementById('newAudio').files[0];
-  if(!file){ return; }
-  
-  // نمایش پیشرفت
-  var nameEl = document.querySelector('.audio-name');
-  if(nameEl) nameEl.textContent = 'در حال آپلود...';
-  toast('⏳ در حال بارگذاری فایل...');
-
+  if(!file) return;
+  var nameEl = document.querySelector('#sec-entertainment .audio-name');
+  if(nameEl) nameEl.textContent = '⏳ در حال آپلود '+file.name+'...';
+  toast('⏳ در حال بارگذاری...');
   var reader = new FileReader();
   reader.onload = function(e){
     openAudioDB(function(db){
-      var tx   = db.transaction('audios','readwrite');
-      var store = tx.objectStore('audios');
-      store.add({name: file.name, data: e.target.result, size: file.size});
+      var tx = db.transaction('audios','readwrite');
+      tx.objectStore('audios').add({name:file.name, data:e.target.result, size:file.size});
       tx.oncomplete = function(){
-        renderAudios();
         if(nameEl) nameEl.textContent = 'برای آپلود کلیک کنید';
-        document.getElementById('newAudio').value = '';
-        toast('✅ فایل "'+file.name+'" افزوده شد');
+        document.getElementById('newAudio').value='';
+        renderAudios();
+        toast('✅ '+file.name+' افزوده شد');
       };
-      tx.onerror = function(){
-        toast('❌ خطا در ذخیره فایل','error');
-      };
+      tx.onerror = function(){ toast('❌ خطا در ذخیره','error'); };
     });
   };
   reader.onerror = function(){ toast('❌ خطا در خواندن فایل','error'); };
@@ -1083,27 +1141,27 @@ function addAudio(){
 }
 
 function renderAudios(){
+  var el = document.getElementById('audioList');
+  if(!el) return;
   openAudioDB(function(db){
-    var tx    = db.transaction('audios','readonly');
-    var store = tx.objectStore('audios');
-    var req   = store.getAll();
+    var req = db.transaction('audios','readonly').objectStore('audios').getAll();
     req.onsuccess = function(e){
-      var audios = e.target.result || [];
-      var el = document.getElementById('audioList');
-      if(!audios.length){
+      var list = e.target.result||[];
+      if(!list.length){
         el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">فایلی آپلود نشده</div>';
         return;
       }
-      el.innerHTML = audios.map(function(a){
-        var sizeMB = a.size ? (a.size/1024/1024).toFixed(1)+' MB' : '';
-        return '<div class="prod-item" style="flex-direction:column;align-items:stretch">'
-          +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-          +'<div><span style="font-size:13px;font-weight:600">🎵 '+a.name+'</span>'
-          +(sizeMB?'<span style="font-size:10px;color:var(--text2);margin-right:6px">'+sizeMB+'</span>':'')+'</div>'
+      el.innerHTML = list.map(function(a){
+        var mb = a.size?(a.size/1024/1024).toFixed(1)+' MB':'';
+        return '<div class="prod-item" style="flex-direction:column;align-items:stretch;gap:8px">'
+          +'<div style="display:flex;justify-content:space-between;align-items:center">'
+          +'<div><span style="font-size:13px;font-weight:700">🎵 '+a.name+'</span>'
+          +(mb?' <span style="font-size:10px;color:var(--text2)">'+mb+'</span>':'')+'</div>'
           +'<button class="btn-del" onclick="delAudio('+a.id+')">🗑️</button></div>'
           +'<audio controls src="'+a.data+'" style="width:100%;border-radius:8px"></audio></div>';
       }).join('');
     };
+    req.onerror = function(){ el.innerHTML='<div style="color:var(--red);padding:10px;font-size:12px">❌ خطا در بارگذاری</div>'; };
   });
 }
 
@@ -1112,6 +1170,62 @@ function delAudio(id){
     var tx = db.transaction('audios','readwrite');
     tx.objectStore('audios').delete(id);
     tx.oncomplete = function(){ renderAudios(); toast('🗑️ حذف شد'); };
+  });
+}
+
+// ===== ویدیو =====
+function addVideo(){
+  var file = document.getElementById('newVideo').files[0];
+  if(!file) return;
+  if(file.size > 50*1024*1024){ toast('حجم فایل بیشتر از ۵۰ مگابایت است','error'); return; }
+  document.getElementById('videoName').textContent = '⏳ در حال آپلود '+file.name+'...';
+  toast('⏳ در حال بارگذاری ویدیو...');
+  var reader = new FileReader();
+  reader.onload = function(e){
+    openAudioDB(function(db){
+      var tx = db.transaction('videos','readwrite');
+      tx.objectStore('videos').add({name:file.name, data:e.target.result, size:file.size});
+      tx.oncomplete = function(){
+        document.getElementById('videoName').textContent = 'برای آپلود کلیک کنید';
+        document.getElementById('newVideo').value='';
+        renderVideos();
+        toast('✅ کلیپ "'+file.name+'" افزوده شد');
+      };
+      tx.onerror = function(){ toast('❌ خطا در ذخیره ویدیو','error'); };
+    });
+  };
+  reader.onerror = function(){ toast('❌ خطا در خواندن فایل','error'); };
+  reader.readAsDataURL(file);
+}
+
+function renderVideos(){
+  var el = document.getElementById('videoList');
+  if(!el) return;
+  openAudioDB(function(db){
+    try{
+      var req = db.transaction('videos','readonly').objectStore('videos').getAll();
+      req.onsuccess = function(e){
+        var list = e.target.result||[];
+        if(!list.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">کلیپی آپلود نشده</div>'; return; }
+        el.innerHTML = list.map(function(v){
+          var mb = v.size?(v.size/1024/1024).toFixed(1)+' MB':'';
+          return '<div class="prod-item" style="flex-direction:column;gap:8px">'
+            +'<div style="display:flex;justify-content:space-between;align-items:center">'
+            +'<div><span style="font-size:13px;font-weight:700">🎬 '+v.name+'</span>'
+            +(mb?' <span style="font-size:10px;color:var(--text2)">'+mb+'</span>':'')+'</div>'
+            +'<button class="btn-del" onclick="delVideo('+v.id+')">🗑️</button></div>'
+            +'<video controls src="'+v.data+'" style="width:100%;border-radius:8px;max-height:200px" playsinline></video></div>';
+        }).join('');
+      };
+    }catch(e){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">کلیپی آپلود نشده</div>'; }
+  });
+}
+
+function delVideo(id){
+  openAudioDB(function(db){
+    var tx = db.transaction('videos','readwrite');
+    tx.objectStore('videos').delete(id);
+    tx.oncomplete = function(){ renderVideos(); toast('🗑️ حذف شد'); };
   });
 }
 
@@ -1309,7 +1423,7 @@ function loadAll(){
   if(c.logoImg){ document.getElementById('logoPreview').src=c.logoImg; document.getElementById('logoPreview').style.display='block'; }
   if(c.bannerImg){ document.getElementById('bannerPreview').src=c.bannerImg; document.getElementById('bannerPreview').style.display='block'; }
 
-  renderProds(); renderCats(); renderAudios(); renderHadiths(); renderGallery(); renderAdvantages();
+  renderProds(); renderCats(); renderAudios(); renderVideos(); renderHadiths(); renderGallery(); renderAdvantages();
   renderPartners(); renderEitaaLinks(); renderPartnerLogs(); renderPartnerOrdersAdmin(); renderStats();
 
   // حجم storage
@@ -1501,6 +1615,250 @@ function toast(msg, type){
   el.textContent=msg;
   el.className='show'+(type==='error'?' error':'');
   setTimeout(function(){ el.className=''; },2500);
+}
+
+
+// ===== بازه قیمتی همکار =====
+var currentTiers = [];
+
+function addTier(){
+  var from  = document.getElementById('tierFrom').value;
+  var to    = document.getElementById('tierTo').value;
+  var price = document.getElementById('tierPrice').value;
+  if(!from||!to||!price){ toast('همه فیلدها را پر کنید','error'); return; }
+  currentTiers.push({from:from, to:to, price:price});
+  renderTiers();
+  document.getElementById('tierFrom').value='';
+  document.getElementById('tierTo').value='';
+  document.getElementById('tierPrice').value='';
+}
+
+function renderTiers(){
+  var el = document.getElementById('tierList');
+  if(!currentTiers.length){
+    el.innerHTML='<div style="font-size:11px;color:var(--text2);text-align:center;padding:8px">بازه‌ای ثبت نشده</div>';
+    return;
+  }
+  el.innerHTML = currentTiers.map(function(t,i){
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+      +'<span style="font-size:12px;color:var(--text2)">'+t.from+' تا '+t.to+' عدد</span>'
+      +'<span style="font-size:12px;color:var(--g);font-weight:700">'+t.price+' ت</span>'
+      +'<button class="btn-del" style="padding:3px 8px;font-size:10px" onclick="delTier('+i+')">✕</button></div>';
+  }).join('');
+}
+
+function delTier(i){
+  currentTiers.splice(i,1);
+  renderTiers();
+}
+
+
+// ===== ویرایش عکس با Canvas =====
+var aiUploadedImg = null;
+var aiResultDataUrl = null;
+
+function loadAIUpload(){
+  var file = document.getElementById('aiUploadFile').files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var prev = document.getElementById('aiUploadPreview');
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+    aiUploadedImg = new Image();
+    aiUploadedImg.onload = function(){ toast('✅ عکس آماده ویرایش است'); };
+    aiUploadedImg.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function editWithAI(){
+  if(!aiUploadedImg){ toast('ابتدا عکس آپلود کنید','error'); return; }
+  toast('⏳ در حال ویرایش...');
+
+  var bgStyle = document.getElementById('aiBgStyle').value;
+  var text    = document.getElementById('aiTextOverlay').value;
+
+  var canvas = document.getElementById('aiCanvas');
+  var W = 800, H = 800;
+  canvas.width  = W;
+  canvas.height = H;
+  var ctx = canvas.getContext('2d');
+
+  // رسم پس‌زمینه
+  var grad;
+  if(bgStyle==='gold'){
+    grad = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.7);
+    grad.addColorStop(0,'#fff8e1');
+    grad.addColorStop(0.4,'#ffd54f');
+    grad.addColorStop(0.7,'#d4af37');
+    grad.addColorStop(1,'#8B6914');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+    // نقوش اسلامی
+    ctx.strokeStyle='rgba(255,255,255,0.15)';
+    ctx.lineWidth=1;
+    for(var i=0;i<12;i++){
+      ctx.beginPath();
+      ctx.arc(W/2,H/2,(i+1)*38,0,Math.PI*2);
+      ctx.stroke();
+    }
+    // چهارگوش‌های تزئینی
+    ctx.strokeStyle='rgba(255,255,255,0.1)';
+    ctx.lineWidth=1.5;
+    for(var j=0;j<5;j++){
+      var m=j*30+40;
+      ctx.strokeRect(m,m,W-2*m,H-2*m);
+    }
+  } else if(bgStyle==='dark'){
+    grad = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.8);
+    grad.addColorStop(0,'#2d2200');
+    grad.addColorStop(0.5,'#1a1400');
+    grad.addColorStop(1,'#000000');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+    // نقاط طلایی
+    ctx.fillStyle='rgba(212,175,55,0.3)';
+    for(var k=0;k<80;k++){
+      var x=Math.random()*W, y=Math.random()*H, r=Math.random()*2+0.5;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+    }
+    // حلقه‌های درخشان
+    ctx.strokeStyle='rgba(212,175,55,0.2)'; ctx.lineWidth=1;
+    for(var l=0;l<6;l++){
+      ctx.beginPath(); ctx.arc(W/2,H/2,(l+1)*65,0,Math.PI*2); ctx.stroke();
+    }
+  } else if(bgStyle==='white'){
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#f5f5f5';
+    for(var m2=0;m2<W;m2+=20){
+      for(var n=0;n<H;n+=20){
+        if((m2+n)%40===0) ctx.fillRect(m2,n,10,10);
+      }
+    }
+  } else if(bgStyle==='nature'){
+    grad = ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,'#1b5e20');
+    grad.addColorStop(0.5,'#2e7d32');
+    grad.addColorStop(1,'#388e3c');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+    // دایره‌های نور
+    ctx.fillStyle='rgba(255,255,255,0.05)';
+    for(var p=0;p<20;p++){
+      ctx.beginPath();
+      ctx.arc(Math.random()*W,Math.random()*H,Math.random()*60+10,0,Math.PI*2);
+      ctx.fill();
+    }
+  } else if(bgStyle==='gradient'){
+    grad = ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,'#6a1b9a');
+    grad.addColorStop(0.3,'#1565c0');
+    grad.addColorStop(0.6,'#00695c');
+    grad.addColorStop(1,'#e65100');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(255,255,255,0.05)';
+    for(var q=0;q<5;q++){
+      var gx=ctx.createRadialGradient(Math.random()*W,Math.random()*H,0,W/2,H/2,W);
+      gx.addColorStop(0,'rgba(255,255,255,0.15)');
+      gx.addColorStop(1,'transparent');
+      ctx.fillStyle=gx; ctx.fillRect(0,0,W,H);
+    }
+  } else if(bgStyle==='marble'){
+    ctx.fillStyle='#f5f5f5'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(0,0,0,0.04)'; ctx.lineWidth=2;
+    for(var r2=0;r2<30;r2++){
+      ctx.beginPath();
+      ctx.moveTo(Math.random()*W,0);
+      ctx.bezierCurveTo(Math.random()*W,H/3,Math.random()*W,H*2/3,Math.random()*W,H);
+      ctx.stroke();
+    }
+  }
+
+  // سایه محصول
+  var imgSize = Math.min(W,H) * 0.65;
+  var imgX = (W-imgSize)/2, imgY = (H-imgSize)/2 - (text?30:10);
+  ctx.shadowColor='rgba(0,0,0,0.4)';
+  ctx.shadowBlur=40; ctx.shadowOffsetY=15;
+
+  // رسم عکس محصول با حاشیه گرد
+  ctx.save();
+  ctx.beginPath();
+  var rad=20;
+  ctx.moveTo(imgX+rad,imgY);
+  ctx.lineTo(imgX+imgSize-rad,imgY);
+  ctx.quadraticCurveTo(imgX+imgSize,imgY,imgX+imgSize,imgY+rad);
+  ctx.lineTo(imgX+imgSize,imgY+imgSize-rad);
+  ctx.quadraticCurveTo(imgX+imgSize,imgY+imgSize,imgX+imgSize-rad,imgY+imgSize);
+  ctx.lineTo(imgX+rad,imgY+imgSize);
+  ctx.quadraticCurveTo(imgX,imgY+imgSize,imgX,imgY+imgSize-rad);
+  ctx.lineTo(imgX,imgY+rad);
+  ctx.quadraticCurveTo(imgX,imgY,imgX+rad,imgY);
+  ctx.closePath();
+  ctx.clip();
+  ctx.drawImage(aiUploadedImg, imgX, imgY, imgSize, imgSize);
+  ctx.restore();
+
+  ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+
+  // حاشیه طلایی دور عکس
+  ctx.strokeStyle = bgStyle==='white'?'#d4af37':'rgba(255,255,255,0.5)';
+  ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.moveTo(imgX+rad,imgY);
+  ctx.lineTo(imgX+imgSize-rad,imgY);
+  ctx.quadraticCurveTo(imgX+imgSize,imgY,imgX+imgSize,imgY+rad);
+  ctx.lineTo(imgX+imgSize,imgY+imgSize-rad);
+  ctx.quadraticCurveTo(imgX+imgSize,imgY+imgSize,imgX+imgSize-rad,imgY+imgSize);
+  ctx.lineTo(imgX+rad,imgY+imgSize);
+  ctx.quadraticCurveTo(imgX,imgY+imgSize,imgX,imgY+imgSize-rad);
+  ctx.lineTo(imgX,imgY+rad);
+  ctx.quadraticCurveTo(imgX,imgY,imgX+rad,imgY);
+  ctx.closePath();
+  ctx.stroke();
+
+  // متن روی عکس
+  if(text){
+    var textY = imgY+imgSize+45;
+    ctx.fillStyle = bgStyle==='white'?'#d4af37':'rgba(255,255,255,0.95)';
+    ctx.font = 'bold 32px Tahoma';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // سایه متن
+    ctx.shadowColor='rgba(0,0,0,0.5)'; ctx.shadowBlur=8;
+    ctx.fillText(text, W/2, textY);
+    ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+  }
+
+  // واترمارک
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.font='14px Tahoma';
+  ctx.textAlign='center';
+  ctx.fillText('ریحانة نورالزهرا', W/2, H-20);
+
+  aiResultDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  document.getElementById('aiResultCard').style.display='block';
+  canvas.scrollIntoView({behavior:'smooth'});
+  toast('✅ ویرایش انجام شد!');
+}
+
+function useAIAsLogo(){
+  if(!aiResultDataUrl) return;
+  var c=getConfig(); c.logoImg=aiResultDataUrl; setConfig(c);
+  document.getElementById('logoPreview').src=aiResultDataUrl;
+  document.getElementById('logoPreview').style.display='block';
+  toast('✅ به عنوان لوگو ذخیره شد');
+}
+function useAIAsBanner(){
+  if(!aiResultDataUrl) return;
+  var c=getConfig(); c.bannerImg=aiResultDataUrl; setConfig(c);
+  document.getElementById('bannerPreview').src=aiResultDataUrl;
+  document.getElementById('bannerPreview').style.display='block';
+  toast('✅ به عنوان بنر ذخیره شد');
+}
+function downloadAIImg(){
+  if(!aiResultDataUrl) return;
+  var a=document.createElement('a');
+  a.href=aiResultDataUrl;
+  a.download='edited-'+Date.now()+'.jpg';
+  a.click();
 }
 
 // ===== هوش مصنوعی =====
